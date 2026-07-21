@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#64ffda">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
     <title>Denomination Calculator | Indian Rupees</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,161 +20,68 @@
         }
 
         .container { max-width: 620px; margin: 0 auto; }
-
         h1 { text-align: center; font-size: 1.8rem; margin-bottom: 6px; color: #fff; }
-
         .subtitle { text-align: center; color: #8892b0; margin-bottom: 28px; font-size: 0.9rem; }
-
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
-
+        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px); }
         .amount-section { text-align: center; }
-
-        .amount-section label {
-            display: block; font-size: 0.8rem; color: #8892b0;
-            margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
-        }
-
+        .amount-section label { display: block; font-size: 0.8rem; color: #8892b0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .amount-input-wrapper { position: relative; width: 100%; }
-
-        .amount-input-wrapper .rupee-symbol {
-            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-            font-size: 1.4rem; color: #64ffda; pointer-events: none;
-        }
-
-        #amount {
-            width: 100%; padding: 14px 16px 14px 38px; font-size: 1.5rem;
-            border: 2px solid rgba(100, 255, 218, 0.3); border-radius: 12px;
-            background: rgba(0, 0, 0, 0.3); color: #fff; text-align: center;
-            outline: none; transition: border-color 0.3s;
-        }
-
+        .amount-input-wrapper .rupee-symbol { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; color: #64ffda; pointer-events: none; }
+        #amount { width: 100%; padding: 14px 16px 14px 38px; font-size: 1.5rem; border: 2px solid rgba(100,255,218,0.3); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; text-align: center; outline: none; transition: border-color 0.3s; }
         #amount:focus { border-color: #64ffda; }
         #amount::placeholder { color: #4a5568; }
-
         .amount-slider-wrap { margin-top: 12px; display: flex; align-items: center; gap: 10px; }
         .amount-slider-wrap .edge-label { font-size: 0.7rem; color: #8892b0; white-space: nowrap; }
-
-        #amount-slider {
-            -webkit-appearance: none; appearance: none; flex: 1; height: 5px;
-            border-radius: 3px; background: rgba(255, 255, 255, 0.1); outline: none; cursor: pointer;
-        }
-
-        #amount-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
-            background: #64ffda; cursor: pointer; box-shadow: 0 2px 8px rgba(100, 255, 218, 0.4);
-        }
-
-        #amount-slider::-moz-range-thumb {
-            width: 20px; height: 20px; border-radius: 50%; background: #64ffda;
-            cursor: pointer; border: none; box-shadow: 0 2px 8px rgba(100, 255, 218, 0.4);
-        }
-
+        #amount-slider { -webkit-appearance: none; appearance: none; flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); outline: none; cursor: pointer; }
+        #amount-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #64ffda; cursor: pointer; box-shadow: 0 2px 8px rgba(100,255,218,0.4); }
+        #amount-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #64ffda; cursor: pointer; border: none; box-shadow: 0 2px 8px rgba(100,255,218,0.4); }
         .quick-amounts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
-
-        .quick-btn {
-            padding: 5px 12px; border: 1px solid rgba(100, 255, 218, 0.3); border-radius: 20px;
-            background: transparent; color: #64ffda; cursor: pointer; font-size: 0.78rem; transition: all 0.2s;
-        }
-
-        .quick-btn:hover { background: rgba(100, 255, 218, 0.1); border-color: #64ffda; }
-
+        .quick-btn { padding: 5px 12px; border: 1px solid rgba(100,255,218,0.3); border-radius: 20px; background: transparent; color: #64ffda; cursor: pointer; font-size: 0.78rem; transition: all 0.2s; }
+        .quick-btn:hover { background: rgba(100,255,218,0.1); border-color: #64ffda; }
         .section-title { font-size: 0.8rem; color: #8892b0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
         .section-hint { font-size: 0.75rem; color: #5a6480; margin-top: -10px; margin-bottom: 14px; }
-
-        .denom-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); gap: 10px; }
+        .denom-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); gap: 10px; }
         .denom-row:last-child { border-bottom: none; }
         .denom-row.disabled { opacity: 0.3; }
-
         .denom-label { min-width: 52px; }
         .denom-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.82rem; }
-
         .denom-slider-wrap { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
-
-        .pct-slider {
-            -webkit-appearance: none; appearance: none; flex: 1; height: 5px; border-radius: 3px;
-            background: rgba(255, 255, 255, 0.1); outline: none; cursor: pointer; min-width: 50px;
-        }
-
-        .pct-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
-            background: #64ffda; cursor: pointer; box-shadow: 0 2px 6px rgba(100, 255, 218, 0.4); transition: transform 0.15s;
-        }
-
+        .pct-slider { -webkit-appearance: none; appearance: none; flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); outline: none; cursor: pointer; min-width: 50px; }
+        .pct-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #64ffda; cursor: pointer; box-shadow: 0 2px 6px rgba(100,255,218,0.4); transition: transform 0.15s; }
         .pct-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
-
-        .pct-slider::-moz-range-thumb {
-            width: 18px; height: 18px; border-radius: 50%; background: #64ffda;
-            cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(100, 255, 218, 0.4);
-        }
-
+        .pct-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #64ffda; cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(100,255,218,0.4); }
         .pct-slider:disabled { opacity: 0.3; cursor: not-allowed; }
         .pct-slider:disabled::-webkit-slider-thumb { background: #4a5568; box-shadow: none; cursor: not-allowed; }
         .pct-slider:disabled::-moz-range-thumb { background: #4a5568; box-shadow: none; }
-
         .pct-value { min-width: 38px; text-align: right; font-weight: 600; font-size: 0.9rem; color: #64ffda; }
-
         .toggle-btn { width: 34px; height: 18px; border-radius: 9px; border: none; cursor: pointer; position: relative; transition: background 0.3s; flex-shrink: 0; }
         .toggle-btn.active { background: #64ffda; }
         .toggle-btn.inactive { background: #4a5568; }
         .toggle-btn::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 2px; transition: left 0.3s; }
         .toggle-btn.active::after { left: 18px; }
         .toggle-btn.inactive::after { left: 2px; }
-
-        .pct-bar { margin-top: 14px; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; display: flex; }
+        .pct-bar { margin-top: 14px; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; display: flex; }
         .pct-bar-segment { height: 100%; transition: width 0.3s; }
-
         .total-pct { text-align: right; margin-top: 6px; font-size: 0.8rem; color: #64ffda; }
-
-        .calculate-btn {
-            width: 100%; padding: 14px; border: none; border-radius: 12px;
-            background: linear-gradient(135deg, #64ffda, #48c9b0); color: #1a1a2e;
-            font-size: 1.05rem; font-weight: 700; cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s; margin-top: 16px;
-        }
-
-        .calculate-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3); }
+        .calculate-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #64ffda, #48c9b0); color: #1a1a2e; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 16px; }
+        .calculate-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(100,255,218,0.3); }
         .calculate-btn:active { transform: translateY(0); }
-
         .results { display: none; }
         .results.show { display: block; }
-
-        .result-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+        .result-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .result-row:last-child { border-bottom: none; }
-
         .result-note { display: flex; align-items: center; gap: 10px; }
         .result-note .note-value { padding: 5px 10px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; min-width: 55px; text-align: center; }
         .result-note .note-amount { color: #8892b0; font-size: 0.82rem; }
-
         .result-count { font-size: 1.3rem; font-weight: 700; color: #fff; }
         .result-count span { font-size: 0.75rem; color: #8892b0; font-weight: 400; }
-
-        .result-summary { margin-top: 14px; padding-top: 14px; border-top: 2px solid rgba(100, 255, 218, 0.2); display: flex; justify-content: space-between; align-items: center; }
+        .result-summary { margin-top: 14px; padding-top: 14px; border-top: 2px solid rgba(100,255,218,0.2); display: flex; justify-content: space-between; align-items: center; }
         .result-summary .total-label { color: #8892b0; font-size: 0.9rem; }
         .result-summary .total-value { font-size: 1.3rem; font-weight: 700; color: #64ffda; }
-
         .result-covered { text-align: right; margin-top: 6px; font-size: 0.8rem; color: #8892b0; }
-
-        .copy-btn {
-            margin-top: 12px; width: 100%; padding: 11px; border: 1px solid rgba(100, 255, 218, 0.3);
-            border-radius: 10px; background: transparent; color: #64ffda; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
-        }
-
-        .copy-btn:hover { background: rgba(100, 255, 218, 0.1); }
-
-        @media (max-width: 480px) {
-            h1 { font-size: 1.4rem; }
-            .card { padding: 16px; }
-            #amount { font-size: 1.2rem; }
-            .denom-row { flex-wrap: wrap; }
-            .denom-slider-wrap { min-width: 100%; }
-        }
+        .copy-btn { margin-top: 12px; width: 100%; padding: 11px; border: 1px solid rgba(100,255,218,0.3); border-radius: 10px; background: transparent; color: #64ffda; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+        .copy-btn:hover { background: rgba(100,255,218,0.1); }
+        @media (max-width: 480px) { h1 { font-size: 1.4rem; } .card { padding: 16px; } #amount { font-size: 1.2rem; } .denom-row { flex-wrap: wrap; } .denom-slider-wrap { min-width: 100%; } }
     </style>
 </head>
 <body>
@@ -220,8 +131,7 @@
     </div>
 
     <script>
-        const MAX_AMOUNT = 10000000; // ₹1 crore (1,00,00,000) - max realistic bank withdrawal
-
+        const MAX_AMOUNT = 10000000;
         const denominations = [
             { value: 10, color: '#b2f5ea', pct: 0, enabled: false },
             { value: 20, color: '#81e6d9', pct: 0, enabled: false },
@@ -230,231 +140,96 @@
             { value: 200, color: '#48c9b0', pct: 20, enabled: true },
             { value: 500, color: '#64ffda', pct: 50, enabled: true },
         ];
-
         let lastResults = [];
 
-        function formatIndian(num) {
-            const str = num.toString();
-            if (str.length <= 3) return str;
-            let last3 = str.slice(-3);
-            let rest = str.slice(0, -3);
-            let formatted = '';
-            while (rest.length > 2) { formatted = ',' + rest.slice(-2) + formatted; rest = rest.slice(0, -2); }
-            return rest + formatted + ',' + last3;
-        }
-
+        function formatIndian(num) { const str = num.toString(); if (str.length <= 3) return str; let last3 = str.slice(-3); let rest = str.slice(0, -3); let formatted = ''; while (rest.length > 2) { formatted = ',' + rest.slice(-2) + formatted; rest = rest.slice(0, -2); } return rest + formatted + ',' + last3; }
         function parseAmount(str) { return parseInt(str.replace(/[^0-9]/g, ''), 10) || 0; }
 
         function autoAdjust(changedIdx, newVal) {
             denominations[changedIdx].pct = newVal;
             const others = denominations.map((d, i) => ({ d, i })).filter(({ d, i }) => d.enabled && i !== changedIdx);
             if (others.length === 0) { denominations[changedIdx].pct = 100; return; }
-            const needed = 100 - newVal;
-            const othersTotal = others.reduce((s, { d }) => s + d.pct, 0);
-            if (othersTotal === 0) {
-                const each = Math.floor(needed / others.length);
-                let rem = needed - each * others.length;
-                others.forEach(({ d }) => { d.pct = each; if (rem > 0) { d.pct++; rem--; } });
-            } else {
-                let assigned = 0;
-                others.forEach(({ d }, idx) => {
-                    if (idx === others.length - 1) { d.pct = Math.max(0, needed - assigned); }
-                    else { d.pct = Math.max(0, Math.round((d.pct / othersTotal) * needed)); assigned += d.pct; }
-                });
-            }
+            const needed = 100 - newVal, othersTotal = others.reduce((s, { d }) => s + d.pct, 0);
+            if (othersTotal === 0) { const each = Math.floor(needed / others.length); let rem = needed - each * others.length; others.forEach(({ d }) => { d.pct = each; if (rem > 0) { d.pct++; rem--; } }); }
+            else { let assigned = 0; others.forEach(({ d }, idx) => { if (idx === others.length - 1) { d.pct = Math.max(0, needed - assigned); } else { d.pct = Math.max(0, Math.round((d.pct / othersTotal) * needed)); assigned += d.pct; } }); }
         }
 
-        function redistribute() {
-            const enabled = denominations.filter(d => d.enabled);
-            if (enabled.length === 0) return;
-            denominations.forEach(d => { if (!d.enabled) d.pct = 0; });
-            const each = Math.floor(100 / enabled.length);
-            let rem = 100 - each * enabled.length;
-            enabled.forEach(d => { d.pct = each; if (rem > 0) { d.pct++; rem--; } });
-        }
+        function redistribute() { const enabled = denominations.filter(d => d.enabled); if (enabled.length === 0) return; denominations.forEach(d => { if (!d.enabled) d.pct = 0; }); const each = Math.floor(100 / enabled.length); let rem = 100 - each * enabled.length; enabled.forEach(d => { d.pct = each; if (rem > 0) { d.pct++; rem--; } }); }
 
         function renderDenomList() {
             const container = document.getElementById('denom-list');
-            container.innerHTML = denominations.map((d, i) => `
-                <div class="denom-row ${!d.enabled ? 'disabled' : ''}" id="row-${i}">
-                    <div class="denom-label">
-                        <span class="denom-badge" style="background:${d.color}22;color:${d.color}">\u20B9${d.value}</span>
-                    </div>
-                    <div class="denom-slider-wrap">
-                        <input type="range" class="pct-slider" id="slider-${i}"
-                               value="${d.pct}" min="0" max="100" step="1"
-                               ${!d.enabled ? 'disabled' : ''}>
-                        <span class="pct-value" id="pct-val-${i}">${d.pct}%</span>
-                    </div>
-                    <button class="toggle-btn ${d.enabled ? 'active' : 'inactive'}" id="toggle-${i}"></button>
-                </div>
-            `).join('');
-
+            container.innerHTML = denominations.map((d, i) => `<div class="denom-row ${!d.enabled ? 'disabled' : ''}" id="row-${i}"><div class="denom-label"><span class="denom-badge" style="background:${d.color}22;color:${d.color}">\u20B9${d.value}</span></div><div class="denom-slider-wrap"><input type="range" class="pct-slider" id="slider-${i}" value="${d.pct}" min="0" max="100" step="1" ${!d.enabled ? 'disabled' : ''}><span class="pct-value" id="pct-val-${i}">${d.pct}%</span></div><button class="toggle-btn ${d.enabled ? 'active' : 'inactive'}" id="toggle-${i}"></button></div>`).join('');
             denominations.forEach((d, i) => {
-                document.getElementById(`slider-${i}`).addEventListener('input', function () {
-                    autoAdjust(i, parseInt(this.value));
-                    syncUI();
-                });
-                document.getElementById(`toggle-${i}`).addEventListener('click', () => {
-                    d.enabled = !d.enabled;
-                    if (!d.enabled) d.pct = 0;
-                    redistribute();
-                    renderDenomList();
-                });
-            });
-
-            updateBar();
-        }
-
-        function syncUI() {
-            denominations.forEach((d, i) => {
-                const s = document.getElementById(`slider-${i}`);
-                const l = document.getElementById(`pct-val-${i}`);
-                if (s) { s.value = d.pct; l.textContent = d.pct + '%'; }
+                document.getElementById(`slider-${i}`).addEventListener('input', function () { autoAdjust(i, parseInt(this.value)); syncUI(); });
+                document.getElementById(`toggle-${i}`).addEventListener('click', () => { d.enabled = !d.enabled; if (!d.enabled) d.pct = 0; redistribute(); renderDenomList(); });
             });
             updateBar();
         }
 
-        function updateBar() {
-            const bar = document.getElementById('pct-bar');
-            const totalEl = document.getElementById('total-pct');
-            const total = denominations.reduce((s, d) => s + (d.enabled ? d.pct : 0), 0);
-            bar.innerHTML = denominations
-                .filter(d => d.enabled && d.pct > 0)
-                .map(d => `<div class="pct-bar-segment" style="width:${d.pct}%;background:${d.color}"></div>`)
-                .join('');
-            totalEl.textContent = `Total: ${total}%`;
-        }
+        function syncUI() { denominations.forEach((d, i) => { const s = document.getElementById(`slider-${i}`); const l = document.getElementById(`pct-val-${i}`); if (s) { s.value = d.pct; l.textContent = d.pct + '%'; } }); updateBar(); }
+
+        function updateBar() { const bar = document.getElementById('pct-bar'); const totalEl = document.getElementById('total-pct'); const total = denominations.reduce((s, d) => s + (d.enabled ? d.pct : 0), 0); bar.innerHTML = denominations.filter(d => d.enabled && d.pct > 0).map(d => `<div class="pct-bar-segment" style="width:${d.pct}%;background:${d.color}"></div>`).join(''); totalEl.textContent = `Total: ${total}%`; }
 
         function calculate() {
             const amount = parseAmount(document.getElementById('amount').value);
             if (!amount || amount <= 0) { alert('Enter a valid amount'); return; }
-
             const activeDenoms = denominations.filter(d => d.enabled && d.pct > 0);
             if (activeDenoms.length === 0) { alert('Enable at least one denomination'); return; }
-
-            let noteMap = new Map();
-            let totalCovered = 0;
-
-            activeDenoms.forEach(d => {
-                const allocated = Math.floor(amount * d.pct / 100);
-                const notes = Math.floor(allocated / d.value);
-                noteMap.set(d.value, notes);
-                totalCovered += notes * d.value;
-            });
-
+            let noteMap = new Map(), totalCovered = 0;
+            activeDenoms.forEach(d => { const allocated = Math.floor(amount * d.pct / 100); const notes = Math.floor(allocated / d.value); noteMap.set(d.value, notes); totalCovered += notes * d.value; });
             let remainder = amount - totalCovered;
             const sortedDesc = [...activeDenoms].sort((a, b) => b.value - a.value);
-
-            for (const d of sortedDesc) {
-                if (remainder <= 0) break;
-                const extraNotes = Math.floor(remainder / d.value);
-                if (extraNotes > 0) {
-                    noteMap.set(d.value, (noteMap.get(d.value) || 0) + extraNotes);
-                    remainder -= extraNotes * d.value;
-                }
-            }
-
+            for (const d of sortedDesc) { if (remainder <= 0) break; const extraNotes = Math.floor(remainder / d.value); if (extraNotes > 0) { noteMap.set(d.value, (noteMap.get(d.value) || 0) + extraNotes); remainder -= extraNotes * d.value; } }
             const smallestEnabled = [...activeDenoms].sort((a, b) => a.value - b.value)[0];
             let overshoot = 0;
-            if (remainder > 0) {
-                noteMap.set(smallestEnabled.value, (noteMap.get(smallestEnabled.value) || 0) + 1);
-                overshoot = smallestEnabled.value - remainder;
-                remainder = 0;
-            }
-
+            if (remainder > 0) { noteMap.set(smallestEnabled.value, (noteMap.get(smallestEnabled.value) || 0) + 1); overshoot = smallestEnabled.value - remainder; remainder = 0; }
             lastResults = [];
-            activeDenoms.sort((a, b) => a.value - b.value).forEach(d => {
-                const notes = noteMap.get(d.value) || 0;
-                if (notes > 0) { lastResults.push({ value: d.value, notes, amount: notes * d.value, color: d.color }); }
-            });
-
+            activeDenoms.sort((a, b) => a.value - b.value).forEach(d => { const notes = noteMap.get(d.value) || 0; if (notes > 0) lastResults.push({ value: d.value, notes, amount: notes * d.value, color: d.color }); });
             const resultList = document.getElementById('result-list');
-            resultList.innerHTML = lastResults.map(r => `
-                <div class="result-row">
-                    <div class="result-note">
-                        <span class="note-value" style="background:${r.color}22;color:${r.color}">\u20B9${r.value}</span>
-                        <span class="note-amount">= \u20B9${formatIndian(r.amount)}</span>
-                    </div>
-                    <div class="result-count">${r.notes} <span>notes</span></div>
-                </div>
-            `).join('');
-
+            resultList.innerHTML = lastResults.map(r => `<div class="result-row"><div class="result-note"><span class="note-value" style="background:${r.color}22;color:${r.color}">\u20B9${r.value}</span><span class="note-amount">= \u20B9${formatIndian(r.amount)}</span></div><div class="result-count">${r.notes} <span>notes</span></div></div>`).join('');
             const totalNotes = lastResults.reduce((s, r) => s + r.notes, 0);
             const totalAmount = lastResults.reduce((s, r) => s + r.amount, 0);
             document.getElementById('total-notes').textContent = totalNotes;
-
             const coveredEl = document.getElementById('result-covered');
-            if (overshoot > 0) {
-                coveredEl.innerHTML = `Exact: \u20B9${formatIndian(totalAmount)} <span style="color:#ffd93d">(+\u20B9${overshoot} extra to avoid loose change)</span>`;
-            } else {
-                coveredEl.innerHTML = `Exact: \u20B9${formatIndian(totalAmount)} \u2714`;
-            }
-
+            if (overshoot > 0) { coveredEl.innerHTML = `Exact: \u20B9${formatIndian(totalAmount)} <span style="color:#ffd93d">(+\u20B9${overshoot} extra)</span>`; }
+            else { coveredEl.innerHTML = `Exact: \u20B9${formatIndian(totalAmount)} \u2714`; }
             document.getElementById('results').classList.add('show');
         }
 
         function copyResults() {
             const amount = parseAmount(document.getElementById('amount').value);
             const totalAmount = lastResults.reduce((s, r) => s + r.amount, 0);
-            let text = `Denomination for \u20B9${formatIndian(amount)}\n`;
-            text += '\u2500'.repeat(32) + '\n';
-            lastResults.forEach(r => {
-                text += `\u20B9${r.value.toString().padStart(3)} x ${r.notes.toString().padStart(4)} = \u20B9${formatIndian(r.amount)}\n`;
-            });
-            text += '\u2500'.repeat(32) + '\n';
-            text += `Total Notes : ${lastResults.reduce((s, r) => s + r.notes, 0)}\n`;
-            text += `Total Amount: \u20B9${formatIndian(totalAmount)}\n`;
-
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.getElementById('copy-btn');
-                btn.textContent = '\u2705 Copied!';
-                setTimeout(() => { btn.textContent = '\uD83D\uDCCB Copy to Clipboard'; }, 2000);
-            });
+            let text = `Denomination for \u20B9${formatIndian(amount)}\n${'─'.repeat(32)}\n`;
+            lastResults.forEach(r => { text += `\u20B9${r.value.toString().padStart(3)} x ${r.notes.toString().padStart(4)} = \u20B9${formatIndian(r.amount)}\n`; });
+            text += `${'─'.repeat(32)}\nTotal Notes : ${lastResults.reduce((s, r) => s + r.notes, 0)}\nTotal Amount: \u20B9${formatIndian(totalAmount)}\n`;
+            navigator.clipboard.writeText(text).then(() => { const btn = document.getElementById('copy-btn'); btn.textContent = '\u2705 Copied!'; setTimeout(() => { btn.textContent = '\uD83D\uDCCB Copy to Clipboard'; }, 2000); });
         }
 
-        // ─── Amount input + slider sync ───
         const amountInput = document.getElementById('amount');
         const amountSlider = document.getElementById('amount-slider');
 
-        amountInput.addEventListener('input', function () {
-            let raw = this.value.replace(/[^0-9]/g, '');
-            if (raw) {
-                let num = parseInt(raw);
-                if (num > MAX_AMOUNT) num = MAX_AMOUNT;
-                this.value = formatIndian(num);
-                amountSlider.value = Math.min(Math.max(num, 10000), 2000000);
-            }
-        });
+        amountInput.addEventListener('input', function () { let raw = this.value.replace(/[^0-9]/g, ''); if (raw) { let num = parseInt(raw); if (num > MAX_AMOUNT) num = MAX_AMOUNT; this.value = formatIndian(num); amountSlider.value = Math.min(Math.max(num, 10000), 2000000); } });
 
-        // Block typing beyond 8 digits (₹1,00,00,000)
         amountInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') { calculate(); return; }
             const isControl = e.ctrlKey || e.metaKey || e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab';
             if (isControl) return;
             const raw = this.value.replace(/[^0-9]/g, '');
-            if (raw.length >= 8 && /[0-9]/.test(e.key)) {
-                e.preventDefault();
-            }
+            if (raw.length >= 8 && /[0-9]/.test(e.key)) { e.preventDefault(); }
         });
 
-        amountSlider.addEventListener('input', function () {
-            amountInput.value = formatIndian(parseInt(this.value));
-        });
-
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const val = parseInt(btn.dataset.amount);
-                amountInput.value = formatIndian(val);
-                amountSlider.value = val;
-            });
-        });
-
+        amountSlider.addEventListener('input', function () { amountInput.value = formatIndian(parseInt(this.value)); });
+        document.querySelectorAll('.quick-btn').forEach(btn => { btn.addEventListener('click', () => { const val = parseInt(btn.dataset.amount); amountInput.value = formatIndian(val); amountSlider.value = val; }); });
         document.getElementById('calc-btn').addEventListener('click', calculate);
         document.getElementById('copy-btn').addEventListener('click', copyResults);
 
         renderDenomList();
         amountInput.value = formatIndian(200000);
+
+        // Register Service Worker for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
     </script>
 </body>
 </html>
