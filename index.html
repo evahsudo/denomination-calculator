@@ -10,15 +10,7 @@
     <title>Denomination Calculator | Indian Rupees</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #e0e0e0;
-        }
-
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 20px; color: #e0e0e0; }
         .container { max-width: 620px; margin: 0 auto; }
         h1 { text-align: center; font-size: 1.8rem; margin-bottom: 6px; color: #fff; }
         .subtitle { text-align: center; color: #8892b0; margin-bottom: 28px; font-size: 0.9rem; }
@@ -97,8 +89,8 @@
             </div>
             <div class="amount-slider-wrap">
                 <span class="edge-label">&#x20B9;10K</span>
-                <input type="range" id="amount-slider" min="10000" max="2000000" step="10000" value="200000">
-                <span class="edge-label">&#x20B9;20L</span>
+                <input type="range" id="amount-slider" min="10000" max="10000000" step="10000" value="200000">
+                <span class="edge-label">&#x20B9;1Cr</span>
             </div>
             <div class="quick-amounts">
                 <button class="quick-btn" data-amount="50000">&#x20B9;50K</button>
@@ -167,7 +159,6 @@
         }
 
         function syncUI() { denominations.forEach((d, i) => { const s = document.getElementById(`slider-${i}`); const l = document.getElementById(`pct-val-${i}`); if (s) { s.value = d.pct; l.textContent = d.pct + '%'; } }); updateBar(); }
-
         function updateBar() { const bar = document.getElementById('pct-bar'); const totalEl = document.getElementById('total-pct'); const total = denominations.reduce((s, d) => s + (d.enabled ? d.pct : 0), 0); bar.innerHTML = denominations.filter(d => d.enabled && d.pct > 0).map(d => `<div class="pct-bar-segment" style="width:${d.pct}%;background:${d.color}"></div>`).join(''); totalEl.textContent = `Total: ${total}%`; }
 
         function calculate() {
@@ -208,7 +199,15 @@
         const amountInput = document.getElementById('amount');
         const amountSlider = document.getElementById('amount-slider');
 
-        amountInput.addEventListener('input', function () { let raw = this.value.replace(/[^0-9]/g, ''); if (raw) { let num = parseInt(raw); if (num > MAX_AMOUNT) num = MAX_AMOUNT; this.value = formatIndian(num); amountSlider.value = Math.min(Math.max(num, 10000), 2000000); } });
+        amountInput.addEventListener('input', function () {
+            let raw = this.value.replace(/[^0-9]/g, '');
+            if (raw) {
+                let num = parseInt(raw);
+                if (num > MAX_AMOUNT) num = MAX_AMOUNT;
+                this.value = formatIndian(num);
+                amountSlider.value = Math.min(Math.max(num, 10000), MAX_AMOUNT);
+            }
+        });
 
         amountInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') { calculate(); return; }
@@ -226,10 +225,7 @@
         renderDenomList();
         amountInput.value = formatIndian(200000);
 
-        // Register Service Worker for offline support
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {});
-        }
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(() => {}); }
     </script>
 </body>
 </html>
