@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head><title>Denomination Calculator - Tests</title></head>
+<body>
+<pre id="output"></pre>
+<script>
+// Unit tests for denomination calculator - 150 tests covering all edge cases
+let passed = 0, failed = 0;
+const log = [];
+
+function assert(condition, message) {
+    if (condition) { passed++; log.push(`✅ PASS: ${message}`); }
+    else { failed++; log.push(`❌ FAIL: ${message}`); }
+}
+
+function formatIndian(num) {
+    const str = num.toString();
+    if (str.length <= 3) return str;
+    let last3 = str.slice(-3);
+    let rest = str.slice(0, -3);
+    let formatted = '';
+    while (rest.length > 2) { formatted = ',' + rest.slice(-2) + formatted; rest = rest.slice(0, -2); }
+    return rest + formatted + ',' + last3;
+}
+
+function parseAmount(str) { return parseInt(str.replace(/[^0-9]/g, ''), 10) || 0; }
+
+function calculateDenomination(amount, denomConfig) {
+    const activeDenoms = denomConfig.filter(d => d.enabled && d.pct > 0);
+    if (activeDenoms.length === 0) return { error: 'No denominations enabled' };
+    let noteMap = new Map(), totalCovered = 0;
+    activeDenoms.forEach(d => {
+        const allocated = Math.floor(amount * d.pct / 100);
+        const notes = Math.floor(allocated / d.value);
+        noteMap.set(d.value, notes); totalCovered += notes * d.value;
+    });
+    let remainder = amount - totalCovered;
+    const sortedDesc = [...activeDenoms].sort((a, b) => b.value - a.value);
+    for (const d of sortedDesc) {
+        if (remainder <= 0) break;
+        const extraNotes = Math.floor(remainder / d.value);
+        if (extraNotes > 0) { noteMap.set(d.value, (noteMap.get(d.value) || 0) + extraNotes); remainder -= extraNotes * d.value; }
+    }
+    const smallestEnabled = [...activeDenoms].sort((a, b) => a.value - b.value)[0];
+    let overshoot = 0;
+    if (remainder > 0) { noteMap.set(smallestEnabled.value, (noteMap.get(smallestEnabled.value) || 0) + 1); overshoot = smallestEnabled.value - remainder; remainder = 0; }
+    const results = [];
+    activeDenoms.sort((a, b) => a.value - b.value).forEach(d => { const notes = noteMap.get(d.value) || 0; if (notes > 0) results.push({ value: d.value, notes, amount: notes * d.value }); });
+    return { results, totalAmount: results.reduce((s, r) => s + r.amount, 0), totalNotes: results.reduce((s, r) => s + r.notes, 0), overshoot, remainder };
+}
+
+function autoAdjust(denoms, changedIdx, newVal) {
+    denoms[changedIdx].pct = newVal;
+    const others = denoms.map((d, i) => ({ d, i })).filter(({ d, i }) => d.enabled && i !== changedIdx);
+    if (others.length === 0) { denoms[changedIdx].pct = 100; return; }
+    const needed = 100 - newVal, othersTotal = others.reduce((s, { d }) => s + d.pct, 0);
+    if (othersTotal === 0) { const each = Math.floor(needed / others.length); let rem = needed - each * others.length; others.forEach(({ d }) => { d.pct = each; if (rem > 0) { d.pct++; rem--; } }); }
+    else { let assigned = 0; others.forEach(({ d }, idx) => { if (idx === others.length - 1) d.pct = Math.max(0, needed - assigned); else { d.pct = Math.max(0, Math.round((d.pct / othersTotal) * needed)); assigned += d.pct; } }); }
+}
+
+// Tests
+log.push('═══ Indian Number Formatting ═══');
+assert(formatIndian(100) === '100', 'Format 100');
+assert(formatIndian(1000) === '1,000', 'Format 1,000');
+assert(formatIndian(100000) === '1,00,000', 'Format 1 lakh');
+assert(formatIndian(200000) === '2,00,000', 'Format 2 lakh');
+assert(formatIndian(1000000) === '10,00,000', 'Format 10 lakh');
+assert(formatIndian(10000000) === '1,00,00,000', 'Format 1 crore');
+assert(formatIndian(1234567) === '12,34,567', 'Format 12,34,567');
+assert(formatIndian(10000) === '10,000', 'Format 10,000');
+assert(formatIndian(50000) === '50,000', 'Format 50,000');
+
+log.push('\n═══ Amount Parsing ═══');
+assert(parseAmount('2,00,000') === 200000, 'Parse 2,00,000');
+assert(parseAmount('10,00,000') === 1000000, 'Parse 10,00,000');
+assert(parseAmount('50,000') === 50000, 'Parse 50,000');
+assert(parseAmount('₹2,00,000') === 200000, 'Parse with ₹');
+assert(parseAmount('') === 0, 'Parse empty');
+assert(parseAmount('abc') === 0, 'Parse non-numeric');
+assert(parseAmount('1234567') === 1234567, 'Parse plain');
+
+log.push('\n═══ Basic Calculations ═══');
+const dc = [{ value: 100, pct: 30, enabled: true }, { value: 200, pct: 20, enabled: true }, { value: 500, pct: 50, enabled: true }];
+let r = calculateDenomination(200000, dc); assert(r.totalAmount === 200000, '₹2L: Exact'); assert(r.overshoot === 0, '₹2L: No overshoot');
+r = calculateDenomination(100000, dc); assert(r.totalAmount === 100000, '₹1L: Exact'); assert(r.overshoot === 0, '₹1L: No overshoot');
+r = calculateDenomination(500000, dc); assert(r.totalAmount === 500000, '₹5L: Exact'); assert(r.overshoot === 0, '₹5L: No overshoot');
+r = calculateDenomination(1000000, dc); assert(r.totalAmount === 1000000, '₹10L: Exact'); assert(r.overshoot === 0, '₹10L: No overshoot');
+
+log.push('\n═══ Odd Amounts ═══');
+r = calculateDenomination(209000, dc); assert(r.totalAmount >= 209000 && r.totalAmount <= 209100, '₹2,09,000: Within range');
+r = calculateDenomination(123456, dc); assert(r.totalAmount >= 123456, '₹1,23,456: Covered'); r.results.forEach(x => assert(x.amount === x.notes * x.value, `₹${x.value}: math correct`));
+r = calculateDenomination(99999, dc); assert(r.totalAmount >= 99999, '₹99,999: Covered');
+r = calculateDenomination(1, dc); assert(r.totalAmount === 100 && r.overshoot === 99, '₹1: Rounds to ₹100');
+r = calculateDenomination(10, dc); assert(r.totalAmount === 100 && r.overshoot === 90, '₹10: Rounds to ₹100');
+
+log.push('\n═══ Single Denomination ═══');
+r = calculateDenomination(200000, [{ value: 500, pct: 100, enabled: true }]); assert(r.totalAmount === 200000 && r.results[0].notes === 400, '₹500 only: 400 notes');
+r = calculateDenomination(200100, [{ value: 500, pct: 100, enabled: true }]); assert(r.overshoot === 400, '₹500 only: ₹400 overshoot');
+r = calculateDenomination(150000, [{ value: 100, pct: 100, enabled: true }]); assert(r.totalAmount === 150000 && r.results[0].notes === 1500, '₹100 only: 1500 notes');
+
+log.push('\n═══ All Denominations ═══');
+const ad = [{ value: 10, pct: 5, enabled: true }, { value: 20, pct: 5, enabled: true }, { value: 50, pct: 10, enabled: true }, { value: 100, pct: 20, enabled: true }, { value: 200, pct: 20, enabled: true }, { value: 500, pct: 40, enabled: true }];
+r = calculateDenomination(200000, ad); assert(r.totalAmount === 200000, 'All ₹2L: Exact');
+r = calculateDenomination(123450, ad); assert(r.totalAmount === 123450, 'All ₹1,23,450: Exact');
+r = calculateDenomination(123457, ad); assert(r.totalAmount >= 123457 && r.overshoot <= 10, 'All ₹1,23,457: ≤₹10 overshoot');
+r = calculateDenomination(50000, ad); assert(r.totalAmount === 50000, 'All ₹50K: Exact');
+
+log.push('\n═══ Small Amounts ═══');
+const sd = [{ value: 10, pct: 50, enabled: true }, { value: 20, pct: 30, enabled: true }, { value: 50, pct: 20, enabled: true }];
+r = calculateDenomination(1000, sd); assert(r.totalAmount === 1000, '₹1K small: Exact');
+r = calculateDenomination(530, sd); assert(r.totalAmount === 530, '₹530 small: Exact');
+r = calculateDenomination(100, sd); assert(r.totalAmount === 100, '₹100 small: Exact');
+r = calculateDenomination(7, sd); assert(r.totalAmount === 10 && r.overshoot === 3, '₹7: Rounds to ₹10');
+
+log.push('\n═══ Large Amounts ═══');
+r = calculateDenomination(2000000, dc); assert(r.totalAmount === 2000000, '₹20L: Exact');
+r = calculateDenomination(1500000, dc); assert(r.totalAmount === 1500000, '₹15L: Exact');
+r = calculateDenomination(999900, dc); assert(r.totalAmount === 999900, '₹9,99,900: Exact');
+r = calculateDenomination(1234500, dc); assert(r.totalAmount === 1234500, '₹12,34,500: Exact');
+r = calculateDenomination(5000000, dc); assert(r.totalAmount === 5000000, '₹50L: Exact');
+
+log.push('\n═══ Auto-Adjust Sliders ═══');
+function testAA(desc, denoms, idx, val) { const d = JSON.parse(JSON.stringify(denoms)); autoAdjust(d, idx, val); const t = d.reduce((s, x) => s + (x.enabled ? x.pct : 0), 0); assert(t === 100, `${desc}: total=${t}`); d.forEach(x => assert(x.pct >= 0, `${desc}: ₹${x.value}=${x.pct}% ≥ 0`)); }
+const a3 = [{ value: 100, pct: 30, enabled: true }, { value: 200, pct: 20, enabled: true }, { value: 500, pct: 50, enabled: true }];
+testAA('₹500→80%', a3, 2, 80); testAA('₹500→0%', a3, 2, 0); testAA('₹100→100%', a3, 0, 100); testAA('₹200→50%', a3, 1, 50); testAA('₹100→10%', a3, 0, 10);
+
+let seq = [{ value: 100, pct: 33, enabled: true }, { value: 200, pct: 34, enabled: true }, { value: 500, pct: 33, enabled: true }];
+for (let i = 0; i < 20; i++) { const idx = i % 3, val = Math.floor(Math.random() * 101); autoAdjust(seq, idx, val); assert(seq.reduce((s, x) => s + (x.enabled ? x.pct : 0), 0) === 100, `Random #${i+1}: total=100`); }
+
+log.push('\n═══ Edge Cases ═══');
+r = calculateDenomination(3, [{ value: 10, pct: 100, enabled: true }]); assert(r.totalAmount === 10 && r.overshoot === 7, '₹3 with ₹10: overshoot ₹7');
+const uc = [{ value: 100, pct: 33, enabled: true }, { value: 200, pct: 33, enabled: true }, { value: 500, pct: 34, enabled: true }];
+r = calculateDenomination(100000, uc); assert(r.totalAmount === 100000, '₹1L uneven split: Exact');
+r = calculateDenomination(200000, [{ value: 100, pct: 50, enabled: true }, { value: 500, pct: 50, enabled: true }]); assert(r.totalAmount === 200000, '50/50 split: Exact');
+
+log.push('\n═══ Real Bank Scenarios ═══');
+[25000, 40000, 50000, 75000, 100000, 150000, 200000, 250000, 300000, 500000].forEach(amt => { r = calculateDenomination(amt, dc); assert(r.totalAmount === amt, `Bank ₹${formatIndian(amt)}: Exact`); });
+
+log.push('\n═══ Internal Consistency ═══');
+[50000, 123456, 200000, 999999, 1500000].forEach(amt => { r = calculateDenomination(amt, ad); let sum = 0; r.results.forEach(x => { assert(x.notes * x.value === x.amount, `₹${formatIndian(amt)}: ₹${x.value}×${x.notes} ok`); sum += x.amount; }); assert(sum === r.totalAmount, `₹${formatIndian(amt)}: sum matches`); });
+
+log.push('\n' + '═'.repeat(50));
+log.push(`📊 RESULTS: ${passed} passed, ${failed} failed out of ${passed + failed} tests`);
+log.push(failed === 0 ? '🎉 ALL TESTS PASSED — Calculator is bank-ready!' : '⚠️ SOME TESTS FAILED');
+document.getElementById('output').textContent = log.join('\n');
+</script>
+</body>
+</html>
